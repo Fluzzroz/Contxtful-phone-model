@@ -1,4 +1,4 @@
-# Classification and clustering of smartphones based on telemetry
+# Classification and clustering of smartphones based on physical sensor data
 
 ## Context
 This is my Captsone project for Udacity's _Machine Learning Engineering Nanodegree_. It was made with the collaboration of CONTXTFUL, the company that supplied my data set.
