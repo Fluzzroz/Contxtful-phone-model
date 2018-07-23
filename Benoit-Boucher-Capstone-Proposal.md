@@ -19,7 +19,7 @@ My first personal motivation for working with CONTXTFUL is because it is a wonde
 
 ### Problem Statement
 
-The primary goal is to identify the phones make-model based solely on their physical data. This can be measured by a simple label classification accuracy score.
+The primary goal is to identify smartphones' make-model based solely on their physical data. This can be measured by a simple label classification accuracy score.
 
 As a secondary target, it would be interesting to cluster the phones and see if a natural separation of the samples occur based on their make-models. This can be measured by weighting the representation of each phone make-models into the clusters.   
 
@@ -69,7 +69,7 @@ The results to both problems are measurable. While the classificition is a simpl
 
 This function was calibrated to return a score close to 1 if the input ratio is either close to 0 or 1. A good score signifies that the labels were indeed clustered into clusters in an exclusive fashion. In other words, a specific label should be found inside a unique cluster and nowhere else. We then average the score of every item in the label-cluster matrix to give the final score.
 
-There is a caveat to this metric: it is highly sensitive to outliers. Clusters can utlimatly contain only one outlier thus fooling the algorithm and generating a very high score.
+There is a caveat to this metric: it is highly sensitive to outliers. Clusters can ultimately contain only one outlier, thus fooling the calculation and generating a very high score.
 
 ### Project Design
 

@@ -4,7 +4,7 @@
 This is my Captsone project for Udacity's _Machine Learning Engineering Nanodegree_. It was made with the collaboration of CONTXTFUL, the company that supplied my data set.
 
 ## Goal
-In this project, the primary goal is to identify the phones make-model based solely on their physical sensor data. This can be measured by a simple label classification accuracy score.
+In this project, the primary goal is to identify smartphones' make-model based solely on their physical sensor data. This can be measured by a simple label classification accuracy score.
 
 As a secondary target, it would be interesting to cluster the phones and see if a natural separation of the samples occur based on their make-models. This can be measured by weighting the representation of each phone make-models into the clusters.
 
