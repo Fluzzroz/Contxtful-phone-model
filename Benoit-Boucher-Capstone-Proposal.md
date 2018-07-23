@@ -6,34 +6,34 @@ Benoît Boucher, 2018-07-20
 
 ### Domain Background
 
-Contxtful is a web marketing company that specializes in using smartphone telemetry data, such as the gyroscope and acceleration sensors, to detect the context of a user. For instance, is he at rest or walking? Is he looking at his screen or not?
+CONTXTFUL is a web marketing company that specializes in using smartphone physical sensor data, such as the gyroscope and acceleration sensors, to detect the context of a user. For instance, is he at rest or walking? Is he looking at his screen or not?
 
-This information helps Contxtful push context-aware ads to people when they are most receptive.
+This information helps CONTXTFUL push context-aware ads to people when they are most receptive.
 
-One of the problems that Contxtful encountered is detecting the type of phone used to generate this data. This is relevant because every phone has different sensors which report their own version of sensor data that can be classified into their different categories (active, at rest, looking at screen, etc.). Knowing the make and model of the phone would allow Contxtful to develop and use make-model specific models, which would result in faster compute time and more accurate results.
+One of the problems that CONTXTFUL encountered is detecting the type of phone used to generate this data. This is relevant because every phone has different sensors which report their own version of sensor data that can be classified into their different categories (active, at rest, looking at screen, etc.). Knowing the make and model of the phone would allow CONTXTFUL to develop and use make-model specific models, which would result in faster compute time and more accurate results.
 
-Up until now, Contxtful has been extracting the make-model information from a special collector agent, but this agent has problems of its own and it would be preferable to skip it entirely.
+Up until now, CONTXTFUL has been extracting the make-model information from a special collector agent, but this agent has problems of its own and it would be preferable to skip it entirely.
 
-My first personal motivation for working with Contxtful is because it is a wonderful opportunity to work on a real-world problem, as opposed to a toy problem. Secondly, the tech lead is an acquaintance of mine, so I'm helping a friend. Finally, this is a great foot in the door for future collaboration or employment.
+My first personal motivation for working with CONTXTFUL is because it is a wonderful opportunity to work on a real-world problem, as opposed to a toy problem. Secondly, the tech lead is an acquaintance of mine, so I'm helping a friend. Finally, this is a great foot in the door for future collaboration or employment.
  
 
 ### Problem Statement
 
-The primary goal is to identify the phones make-model based solely on their telemetry data. This can be measured by a simple label classification accuracy score.
+The primary goal is to identify the phones make-model based solely on their physical data. This can be measured by a simple label classification accuracy score.
 
 As a secondary target, it would be interesting to cluster the phones and see if a natural separation of the samples occur based on their make-models. This can be measured by weighting the representation of each phone make-models into the clusters.   
 
 ### Datasets and Inputs
 
-The dataset is derived from a measure of a phone's telemetry. What Contxtfull calls a "raw_data_vector" is generated every second and includes all data points from the various sensors (X-Y-Z gyroscope, X-Y-Z accelerometer, etc) sampled at the phone's sample rate. This rate varies by model, but is generally in the range of 16-32 Hz. Consequently, the raw_data_vector do not have a consistent length. 
+The dataset is derived from a measure of a phone's physical sensor. What CONTXTFUL calls a "raw_data_vector" is generated every second and includes all data points from the various sensors (X-Y-Z gyroscope, X-Y-Z accelerometer, etc) sampled at the phone's sample rate. This rate varies by model, but is generally in the range of 16-32 Hz. Consequently, the raw_data_vector do not have a consistent length. 
 
 The "raw_data_vector" will not be available to us for our ML models.
 
-What will be used in our ML models is what Contxtfull refers to as "full_stat_vector". This is a vector of consistent length that includes a slew of various statistical metrics. For instance: maximum_gyroscope_speed_Z, first_derivate_linear_acceleration_Z, mean_euclidean_speed, etc. The total number of features is 1652.
+What will be used in our ML models is what CONTXTFUL refers to as "full_stat_vector". This is a vector of consistent length that includes a slew of various statistical metrics. For instance: maximum_gyroscope_speed_Z, first_derivate_linear_acceleration_Z, mean_euclidean_speed, etc. The total number of features is 1652.
  
  The "full_stat_vector" will be provided without labels, preventing us from knowing specifically what each column represents.
 
-Telemetry data is collected on phones who browse websites on which the Contxtful plugin is installed. The specific websites wishes to remain anonymous.
+Physical sensor data is collected on phones who browse websites on which the CONTXTFUL plugin is installed. The specific websites wishes to remain anonymous.
 
 Approximately 12 000 samples (full_stat_vector) will be provided.
 
@@ -51,9 +51,9 @@ In fact, to be completely replicable, we will provide access to the Python code 
 
 ### Benchmark Model
 
-For the classification problem, Contxtful has obtained good results using Linear Discriminent Analysis (LDA), which is also in line with the idea to "cluster" the data since at its core, it is a supervised dimensionality reduction algorithm. 
+For the classification problem, CONTXTFUL has obtained good results using Linear Discriminent Analysis (LDA), which is also in line with the idea to "cluster" the data since at its core, it is a supervised dimensionality reduction algorithm. 
 
-For the clustering problem, Contxtful did not obtain satisfying results. However, their current best approach is with the Gaussian Mixture.
+For the clustering problem, CONTXTFUL did not obtain satisfying results. However, their current best approach is with the Gaussian Mixture.
 
 The results to both problems are measurable. While the classificition is a simple accuracy metric, the clustering will be measured by a homebrew metric because the problem is very specific in nature. In both cases, visual aid can be provided:
 * A bar chart of accuracy per label for Classification.
@@ -77,7 +77,7 @@ _(approx. 1 page)_
 
 The following workflow will be repeated twice, once for each separate objective:
 **General Workflow**
-1. Reproduce the results of Contxtful.
+1. Reproduce the results of CONTXTFUL.
 2. Try various algorithms appropriate for the goal. See the list below.
 3. Once a good approach is found, optimize the hyperparameters, if any. This can be done via BIC score for Gaussian Mixture, or Random Search Cross Validation for all other techniques.
 4. Present the results.
