@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Date : 2018-06-24 to 2018-07-20
+Date : 2018-06-24 to 2018-07-27
 Author: Benoît Boucher
 
 Credits: 
-    Some functions were coded by myself, some others are adaptations of work from colleagues or 
-    found on the web. Credit is given at the end of the appropriate function's doc-string.
+    Some functions were coded by myself, some others are adaptations of work
+    found on the web. Credit is given at the end of the appropriate function's
+    doc-string.
 """
 
-import os, time, math
+import math
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,56 +18,7 @@ from sklearn.model_selection import learning_curve
 from scipy.stats import uniform
 
 
-def LoadGzFormat(path_to_name):
-    """
-    This function combines all the data from the .pygz format in the path folder.
-    This is a home made function that only works on these home made .pygz formats.
-    :param
-        path_to_name: str
-            path to name of the folder in which all the .pygz files exists
-
-    :return
-        full: pandas.DataFrame.Object
-            dataframe will all the metadata and full_stat_vector for the original db 
-            without all the proximity object.
-
-    Credit: Based on Alexandre Désilet-Benoit's work, CONTXTFUL
-    """
-    try:
-        path = os.path.abspath(path_to_name)
-        name = os.path.basename(path)
-        path += "/"
-
-        metadata = []
-        places = list(os.walk(path))
-        largest = 0
-        for things in places[0][2]:
-            if "_meta.pygz" in things:
-                meta = pd.read_pickle(path+name + "_meta.pygz",'gzip')
-            else:
-                this = things.replace(name+"_","")
-                this = int(this.replace("_fsv.pygz",""))
-                if this > largest:
-                    largest = this
-        stat = pd.read_pickle(path+name + "_1000_fsv.pygz",'gzip')
-        j = 2000
-        while j < largest:
-            stat = pd.concat([stat,
-                pd.read_pickle(path+name + "_"+str(j)+"_fsv.pygz",'gzip')
-                ])
-            j += 1000
-        stat = pd.concat([stat,
-                pd.read_pickle(path+name + "_"+str(largest)+"_fsv.pygz",'gzip')
-                ])
-        full = meta
-        full = full.assign(full_stat_vector=stat.full_stat_vector)
-        return full
-    except:
-        print("Either path is not well written or the folders are not present")
-        return False
-
-
-def LabelClusterMatrix(df, y_predict, label_column="model", percentage=True):
+def LabelClusterMatrix(y_true, y_predict, labels=None, percentage=True):
     """
     This function takes a reference DataFrame that contains true labels and compares them with 
     predicted labels from a clustering algorithm. It returns a matrix where the rows are 
@@ -74,16 +26,12 @@ def LabelClusterMatrix(df, y_predict, label_column="model", percentage=True):
     number of samples that has label(i) and was classified into cluster(j).
 
     :param
-        df: pandas.DataFrame that contains the target data. The target data are categories
-            written in string format. NOTE: df HAS to be a dataframe. The groupby does not work
-            if df is a series (ie: use df, not df.model)
-        y_predict: a numpy.array with shape (n,) where n == len(df.label_column). It contains the
-            results of the clustering algorithm, which is a number associated with a cluster for
-            each sample
-        label_column: a string which corresponds to the name of the df column which contains the
-            target data. We assume that the input df might contain more than 1 column and this
-            tells us which column is relevant. Even if df contains only 1 column, we still
-            need the name to get the groupby method going.
+        y_true: a numpy.array that contains the true labels of the dataset.
+        y_predict: a numpy.array that contains the results of the clustering
+            algorithm, which is a number associated with a cluster for each sample
+        labels: a list of strings which corresponds to the name of true labels.
+            It should have a length equal to the number of different labels.
+            If omitted (the default), we will use the unique values of y_true.
         percentage: boolean value. If False, the values returned are the raw number of labels.
             If true, the values returned are a percentage (between 0-1) between the number of
             labels in the cluster and the total number of labels. Each label will sum to 1
@@ -95,28 +43,30 @@ def LabelClusterMatrix(df, y_predict, label_column="model", percentage=True):
             Each datapoint is the total number of sample with
             a particular label grouped into the corresponding cluster. 
 
-    Tip: Use the output of LoadGzFormat as df. Then use the output of this function as input 
-        for HistoCluster or ClusterScore
+    Tip: Use the output of this function as input for HistoCluster and ClusterScore.
     """
-    
+    if labels is None:
+        labels = set(y_true)
+
     clusters = set(y_predict)
-    y, labels = pd.factorize(df.loc[:, label_column])
+    df = pd.DataFrame(y_true)
     lcm = pd.DataFrame(index=labels, columns=clusters)
 
     if percentage:
-        divider = df.groupby(label_column).size()
+        divider = df.groupby(0).size()
     else:
         divider = 1
 
     for cluster in clusters:
-        lcm.loc[:,cluster] = df[y_predict == cluster].groupby(label_column).size() / divider
-    
+        ratios = df[y_predict == cluster].groupby(0).size() / divider
+        lcm.loc[:,cluster] = ratios.values
+
     lcm = lcm.fillna(0)
 
     return lcm
 
 
-def HistoCluster(lcm):
+def HistoCluster(lcm, filepath=None, figsize=None):
     """
     This function creates a figure with as many subplots as there are clusters.
     Each subplot is a histogram that has as many bins as there are labels.
@@ -127,7 +77,11 @@ def HistoCluster(lcm):
             index is the labels and the columns are the clusters. 
             Each datapoint is the total number of sample with 
             a particular label grouped into the corresponding cluster.
-    :return None; shows a figure
+        filepath: if you want to save your figure, enter a string consisting of
+            the "full/path/filename.extension". If None, the fig won't be saved.
+        figsize: a tuple of 2 integers defining the figsize. Dont't put any to
+            let matplotlib decide.
+    :return None; shows and possibly save a figure
 
     Tip: use the output of LabelClusterMatrix as input for HistoCluster
     """
@@ -139,8 +93,9 @@ def HistoCluster(lcm):
     n_rows = min(n_clusters, max_rows)
     n_cols = math.ceil(n_clusters/max_rows)
 
-    fig,ax=plt.subplots(nrows=n_rows, ncols=n_cols, sharex="all", sharey="row", squeeze=False)    
-
+    fig, ax=plt.subplots(nrows=n_rows, ncols=n_cols, sharex="all", sharey="row",
+                         squeeze=False, figsize=figsize)
+    fig
     colors = []
     for c in range(n_labels):
         colors.append(plt.cm.tab20(c))
@@ -155,8 +110,13 @@ def HistoCluster(lcm):
         ax[row,col].set_yticks(ind)
         ax[row,col].set_yticklabels(labels, minor=False, size="xx-small")
         ax[row,col].set_title('Cluster# ' + str(clusters[c]), size="x-small", va="top")
-    
-    plt.show()
+
+    if filepath:
+        plt.savefig(filepath, bbox_inches="tight")
+        print("Saved:", filepath)
+    else:
+        plt.show()
+
 
 def ClusterScore(lcm):
     """
@@ -202,8 +162,9 @@ def abso(x):
     return 2*abs(x-0.5)
 
 
-def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
-                        n_jobs=1, train_sizes=np.linspace(.1, 1.0, 5)):
+def plot_learning_curve(estimator, title, X, y, scoring=None, ylim=None,
+                        cv=None, n_jobs=1,
+                        train_sizes=np.linspace(.1, 1.0, 5)):
     """
     Generate a simple plot of the test and training learning curve.
 
@@ -250,12 +211,17 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
     """
     plt.figure()
     plt.title(title)
+    if scoring is not None:
+        y_label = scoring + " Score"
+    else:
+        y_label = "Score"
     if ylim is not None:
         plt.ylim(*ylim)
     plt.xlabel("Training examples")
-    plt.ylabel("Score")
+    plt.ylabel(y_label)
     train_sizes, train_scores, test_scores = learning_curve(
-        estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
+        estimator, X, y, scoring=scoring,cv=cv,
+        n_jobs=n_jobs, train_sizes=train_sizes)
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
     test_scores_mean = np.mean(test_scores, axis=1)
@@ -335,12 +301,3 @@ class log_uniform():
         """
         uniform_distrib = uniform(loc=self.loc, scale=self.scale)
         return np.power(self.base, uniform_distrib.rvs(size=size, random_state=random_state))
-
-
-if __name__ == "__main__":
-    t0 = time.time()
-    df = LoadGzFormat("/home/bboucher/workspace/DATA/gzDataFormat/amt_confirmed_data")
-    #df = LoadGzFormat("/home/bboucher/workspace/DATA/gzDataFormat/lifeofpix_analyzed_data")
-    t1 = time.time()
-    print(round(1000000*(t1-t0)/len(df)),"microseconds per element in df")
-
