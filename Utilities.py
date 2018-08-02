@@ -95,7 +95,7 @@ def HistoCluster(lcm, filepath=None, figsize=None):
 
     fig, ax=plt.subplots(nrows=n_rows, ncols=n_cols, sharex="all", sharey="row",
                          squeeze=False, figsize=figsize)
-    fig
+
     colors = []
     for c in range(n_labels):
         colors.append(plt.cm.tab20(c))
@@ -133,11 +133,12 @@ def ClusterScore(lcm):
     :return a single float between 0-1 representing the score; 1 being the best.
     """
     if ((lcm > 1).any() | (lcm < 0).any()).any():
-        print("Error. Detected 1 or more values outside of 0 <= x <= 1")
+        print("Error. Detected at least one value outside of 0 <= x <= 1")
         return -1
     else:
         matrix_score = lcm.apply(abso)
         return matrix_score.mean().mean()
+
 
 def quad(x):
     """
@@ -149,6 +150,7 @@ def quad(x):
     :return a float transformed by the quadratic equation below
     """
     return 4*x**2 - 4*x + 1
+
 
 def abso(x):
     """
