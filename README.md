@@ -23,3 +23,6 @@ See [Solution.ipynb](https://github.com/Fluzzroz/Contxtful-phone-model/blob/mast
 
 See [Benoit-Boucher-Capstone-Report.pdf](https://github.com/Fluzzroz/Contxtful-phone-model/blob/master/Benoit-Boucher-Capstone-Report.pdf) for my final report in white-paper form.
 
+My report was reviewed and accepted [here](https://review.udacity.com/#!/reviews/1377829)
+
+
